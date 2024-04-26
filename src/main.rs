@@ -1,10 +1,10 @@
-use papmet::PatriciaTrie;
+use papmet::Base16PatriciaTrie;
 
 fn main() {
-    let mut trie = PatriciaTrie::new();
-    trie.insert("hello", 5);
-    trie.insert("hell", 7);
-    trie.insert("helium", 10);
-    trie.insert("foo", 1);
+    let mut trie = Base16PatriciaTrie::new();
+    trie.insert("1a3b", 5);
+    trie.insert("1a3c", 7);
+    trie.insert("1a3d", 10);
+
     trie.print();
 }

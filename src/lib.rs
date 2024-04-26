@@ -19,37 +19,44 @@ impl<T: Debug> TrieNode<T> {
 }
 
 #[derive(Debug)]
-pub struct PatriciaTrie<T: Debug> {
+pub struct Base16PatriciaTrie<T: Debug> {
     root: TrieNode<T>,
 }
 
-impl<T: Debug> PatriciaTrie<T> {
+impl<T: Debug> Base16PatriciaTrie<T> {
     pub fn new() -> Self {
-        PatriciaTrie {
+        Base16PatriciaTrie {
             root: TrieNode::new(),
         }
     }
 
-    pub fn insert(&mut self, word: &str, value: T) {
+    // Inserts a hex-encoded string into the trie with an associated value.
+    pub fn insert(&mut self, hex_str: &str, value: T) {
         let mut current_node = &mut self.root;
-        for ch in word.chars() {
-            current_node = current_node
-                .children
-                .entry(ch)
-                .or_insert_with(TrieNode::new);
+        // Ensure that the string is interpreted as hex digits
+        for ch in hex_str.chars() {
+            if ch.is_digit(16) {
+                // Only proceed if the character is a valid hex digit
+                current_node = current_node
+                    .children
+                    .entry(ch.to_ascii_uppercase())
+                    .or_insert_with(TrieNode::new);
+            } else {
+                eprintln!("Invalid hex character: {}", ch);
+                return;
+            }
         }
         current_node.value = Some(value);
     }
 
     pub fn print(&self) {
-        println!("Patricia Trie:");
+        println!("Base16 Patricia Trie:");
         for (&ch, child) in &self.root.children {
             println!("{}", ch);
             self.print_from(child, "", true);
         }
     }
 
-    // Recursive helper method to print the trie
     fn print_from(&self, node: &TrieNode<T>, prefix: &str, is_last: bool) {
         let indent = if is_last { "    " } else { "│   " };
         let children = node.children.iter().collect::<Vec<_>>();
