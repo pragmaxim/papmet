@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rocksdb = "0.17"
+sha2 = "0.9.8"
 
 # This tells Rust to compile both lib.rs and main.rs
 [[bin]]
