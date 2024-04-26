@@ -40,4 +40,36 @@ impl<T: Debug> PatriciaTrie<T> {
         }
         current_node.value = Some(value);
     }
+
+    pub fn print(&self) {
+        println!("Patricia Trie:");
+        for (&ch, child) in &self.root.children {
+            println!("{}", ch);
+            self.print_from(child, "", true);
+        }
+    }
+
+    // Recursive helper method to print the trie
+    fn print_from(&self, node: &TrieNode<T>, prefix: &str, is_last: bool) {
+        let indent = if is_last { "    " } else { "│   " };
+        let children = node.children.iter().collect::<Vec<_>>();
+        for (i, (&ch, child)) in children.iter().enumerate() {
+            let connector = if i == children.len() - 1 {
+                "└── "
+            } else {
+                "├── "
+            };
+            let new_prefix = format!("{}{}{}", prefix, connector, ch);
+            if let Some(ref value) = child.value {
+                println!("{} ({:?})", new_prefix, value);
+            } else {
+                println!("{}", new_prefix);
+            }
+            self.print_from(
+                child,
+                &(prefix.to_string() + indent),
+                i == children.len() - 1,
+            );
+        }
+    }
 }
