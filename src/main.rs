@@ -2,7 +2,7 @@
 use papmet::Base16PatriciaTrie;
 
 fn main() {
-    let mut trie = Base16PatriciaTrie::new("path/to/rocksdb");
+    let mut trie = Base16PatriciaTrie::new("/tmp/rocksdb");
 
     // Hexadecimal keys and values
     trie.insert(b"1a3b".to_vec(), b"Hello, World!".to_vec());
