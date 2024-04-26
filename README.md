@@ -1,0 +1,1 @@
+Learning Rust by implementing Persistent Authenticated Merkle Trie datastructure for holding state of decentralized software like Blockchain
