@@ -8,11 +8,22 @@ edition = "2021"
 [dependencies]
 rocksdb = "0.17"
 sha2 = "0.9.8"
+parity-db = "0.4"
+firewood = { git = "https://github.com/ava-labs/firewood.git", branch = "main" }
+tokio = { version = "1", features = ["full"] }
+rand = "0.8.5"
 
-# This tells Rust to compile both lib.rs and main.rs
 [[bin]]
 name = "papmet"
-path = "src/main.rs"
+path = "src/bin/papmet.rs"
+
+[[bin]]
+name = "firewood"
+path = "src/bin/firewood.rs"
+
+[[bin]]
+name = "paritydb"
+path = "src/bin/paritydb.rs"
 
 [lib]
 name = "papmet"
