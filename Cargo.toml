@@ -12,6 +12,7 @@ parity-db = "0.4"
 firewood = { git = "https://github.com/ava-labs/firewood.git", branch = "main" }
 tokio = { version = "1", features = ["full"] }
 rand = "0.8.5"
+hex = "0.4.3"
 
 [[bin]]
 name = "papmet"

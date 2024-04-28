@@ -48,23 +48,22 @@ impl<T: Debug + Clone + AsRef<[u8]>> Base16PatriciaTrie<T> {
         }
     }
 
-    pub fn insert(&mut self, key: Vec<u8>, value: T) {
+    pub fn insert(&mut self, key: &[u8], value: T) {
+        let key_bytes = key.to_vec();
         let mut node = &mut self.root;
-        for byte in key.iter() {
-            if !byte.is_ascii_hexdigit() {
-                eprintln!("Invalid hex character: {}", byte);
-                return;
-            }
-            let index = byte.to_ascii_uppercase();
+        for byte in key_bytes.iter() {
+            let index = *byte;
             node = node.children.entry(index).or_insert_with(TrieNode::new);
         }
         node.value = Some(value.clone());
         node.compute_hash();
-        self.db.put(key, value).expect("Failed to write to DB");
+        self.db
+            .put(&key_bytes, value)
+            .expect("Failed to write to DB");
         self.root.compute_hash();
     }
 
-    pub fn get(&self, key: Vec<u8>) -> Option<Vec<u8>> {
+    pub fn get(&self, key: &[u8]) -> Option<Vec<u8>> {
         self.db.get(key).unwrap()
     }
 

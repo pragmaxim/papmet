@@ -2,15 +2,16 @@
 use papmet::Base16PatriciaTrie;
 
 fn main() {
-    let mut trie = Base16PatriciaTrie::new("/tmp/rocksdb");
+    let mut trie: Base16PatriciaTrie<&[u8]> = Base16PatriciaTrie::new("/tmp/rocksdb");
 
     // Hexadecimal keys and values
-    trie.insert(b"1a3b".to_vec(), b"Hello, World!".to_vec());
-    trie.insert(b"1a3c".to_vec(), b"Good Bye, World!".to_vec());
+    trie.insert(b"1a3b", b"Hello, World!");
+    trie.insert(b"1a3c", b"Good Bye, World!");
 
-    // Retrieve values
-    if let Some(value) = trie.get(b"1a3b".to_vec()) {
-        println!("Value for '1a3b': {:?}", String::from_utf8(value));
+    // retrieve value as Option and print it out otherwise print "Key not found"
+    match trie.get(b"1a3b") {
+        Some(value) => println!("{:?}", value),
+        None => println!("Key not found"),
     }
 
     trie.print();
