@@ -6,13 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocksdb = "0.17"
+rocksdb = "0.21.0"
 sha2 = "0.9.8"
 parity-db = "0.4"
 firewood = { git = "https://github.com/ava-labs/firewood.git", branch = "main" }
 tokio = { version = "1", features = ["full"] }
 rand = "0.8.5"
 hex = "0.4.3"
+merk = { git = "https://github.com/turbofish-org/merk.git", branch = "develop" }
 
 [[bin]]
 name = "papmet"

@@ -10,13 +10,15 @@ use tokio;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // delete /tmp/firewood directory if it exists
+    let _ = std::fs::remove_dir_all("/tmp/firewood");
     let cfg = DbConfig::builder().truncate(true).build();
     let db = Db::new("/tmp/firewood", &cfg)
         .await
         .expect("db initiation should succeed");
 
     let txs = 1000;
-    let keys = 100;
+    let keys = 50;
     let keylen = 32; // Length of each key
     let valuelen = 256; // Length of each value
 

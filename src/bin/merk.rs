@@ -1,22 +1,14 @@
-use parity_db::{Db, Options};
+use merk::*;
 use rand::prelude::*;
 use rand::{distributions::Alphanumeric, Rng};
 use std::borrow::BorrowMut as _;
 use std::fs;
-use std::path::Path;
 use std::time::Instant;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let db_path = Path::new("/tmp/paritydb");
-    if !db_path.exists() {
-        fs::create_dir_all(db_path)?;
-    }
-
-    let mut options = Options::with_columns(db_path, 1);
-    options.sync_wal = true;
-    options.sync_data = true;
-
-    let db = Db::open_or_create(&options)?;
+fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    // delete /tmp/merk.db file if it exists
+    let _ = fs::remove_file("/tmp/merk.db");
+    let mut merk = Merk::open("/tmp/merk.db").unwrap();
 
     // Prepare to measure insertion time
 
@@ -32,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Commit 10,000 transactions each with 10 key-value pairs
     for _ in 0..txs {
-        let mut transaction = Vec::new();
+        let mut transaction: Vec<(Vec<u8>, Op)> = Vec::new();
         for _ in 0..keys {
             let key = rng
                 .borrow_mut()
@@ -44,10 +36,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .sample_iter(&Alphanumeric)
                 .take(valuelen)
                 .collect::<Vec<u8>>();
-            transaction.push((0, key.clone(), Some(value)));
+            transaction.push((key.clone(), Op::Put(value)));
             all_keys.push(key);
         }
-        db.commit(transaction)?;
+        transaction.sort_by(|a, b| a.0.cmp(&b.0));
+        let batch: &[(Vec<u8>, Op)] = &transaction;
+        merk.apply(batch, &[]).unwrap();
     }
 
     let insertion_duration = start_time.elapsed();
@@ -62,7 +56,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Verify all keys
     for key in all_keys {
-        let _retrieved_value = db.get(0, &key)?.ok_or("Value not found for key")?;
+        let _retrieved_value = merk.get(&key)?.ok_or("Value not found for key")?;
     }
 
     let reading_duration = start_time.elapsed();
