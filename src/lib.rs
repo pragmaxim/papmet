@@ -5,10 +5,10 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub mod settings {
-    pub static TXS_COUNT: usize = 1000;
+    pub static TXS_COUNT: usize = 500;
     pub static KEYS_COUNT: usize = 50;
-    pub static KEY_LENGTH: usize = 32; // Length of each key
-    pub static VALUE_LENGTH: usize = 256; // Length of each value
+    pub static KEY_LENGTH: usize = 16; // Length of each key
+    pub static VALUE_LENGTH: usize = 128; // Length of each value
 }
 
 // define module utils

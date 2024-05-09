@@ -5,7 +5,7 @@ use papmet::random::generate_kv;
 use papmet::settings::*;
 use rand::prelude::*;
 use std::fs;
-use std::time::Instant;
+use std::time::Instant; // Add missing import // Import the common module
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // delete /tmp/merk.db file if it exists
@@ -27,7 +27,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             all_keys.push((key, value));
         }
         transaction.sort_by(|a, b| a.0.cmp(&b.0));
-        unsafe { merk.apply_unchecked(transaction.as_slice(), &[]).unwrap() };
+        unsafe { merk.apply_unchecked(&transaction, &[]).unwrap() };
     }
 
     let insertion_duration = start_time.elapsed();
@@ -46,9 +46,9 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         let mut q = Query::new();
         q.insert_item(QueryItem::Key(key.clone()));
         let proof = merk.prove_unchecked(q)?;
-        let map = merk::verify(proof.as_slice(), root_hash).unwrap();
-        // print all keys and values of the map as Strings
-        assert_eq!(map.get(key.as_slice()).unwrap().unwrap(), value.as_slice());
+        let map = merk::verify(&proof, root_hash).unwrap();
+        // assert proof contains valid values under keys
+        assert_eq!(map.get(&key).unwrap().unwrap(), value.as_slice());
     }
 
     let reading_duration = start_time.elapsed();
