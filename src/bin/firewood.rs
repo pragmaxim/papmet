@@ -50,8 +50,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start_time = Instant::now();
 
     // Verify all keys
-    let rootHash = db.root_hash().await?;
-    let revision = db.revision(rootHash).await?;
+    let root_hash = db.root_hash().await?;
+    let revision = db.revision(root_hash).await?;
     for key in all_keys {
         revision.kv_get(key);
     }
