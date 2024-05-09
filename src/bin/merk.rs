@@ -1,9 +1,11 @@
+use merk::proofs::query::QueryItem;
+use merk::proofs::Query;
 use merk::*;
 use papmet::random::generate_kv;
 use papmet::settings::*;
 use rand::prelude::*;
 use std::fs;
-use std::time::Instant; // Add missing import // Import the common module
+use std::time::Instant;
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // delete /tmp/merk.db file if it exists
@@ -16,17 +18,16 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     let start_time = Instant::now();
 
-    // Commit 10,000 transactions each with 10 key-value pairs
+    // Commit transactions with key-value pairs
     for _ in 0..TXS_COUNT {
         let mut transaction: Vec<(Vec<u8>, Op)> = Vec::new();
         for _ in 0..KEYS_COUNT {
             let (key, value) = generate_kv(&mut rng, KEY_LENGTH, VALUE_LENGTH);
-            transaction.push((key.clone(), Op::Put(value)));
-            all_keys.push(key);
+            transaction.push((key.clone(), Op::Put(value.clone())));
+            all_keys.push((key, value));
         }
         transaction.sort_by(|a, b| a.0.cmp(&b.0));
-        let batch: &[(Vec<u8>, Op)] = &transaction;
-        merk.apply(batch, &[]).unwrap();
+        unsafe { merk.apply_unchecked(transaction.as_slice(), &[]).unwrap() };
     }
 
     let insertion_duration = start_time.elapsed();
@@ -40,8 +41,14 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let start_time = Instant::now();
 
     // Verify all keys
-    for key in all_keys {
-        let _retrieved_value = merk.get(&key)?.ok_or("Value not found for key")?;
+    let root_hash = merk.root_hash();
+    for (key, value) in all_keys.iter() {
+        let mut q = Query::new();
+        q.insert_item(QueryItem::Key(key.clone()));
+        let proof = merk.prove_unchecked(q)?;
+        let map = merk::verify(proof.as_slice(), root_hash).unwrap();
+        // print all keys and values of the map as Strings
+        assert_eq!(map.get(key.as_slice()).unwrap().unwrap(), value.as_slice());
     }
 
     let reading_duration = start_time.elapsed();

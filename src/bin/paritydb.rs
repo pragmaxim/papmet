@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let start_time = Instant::now();
 
-    // Commit 10,000 transactions each with 10 key-value pairs
+    // Commit transactions with key-value pairs
     for _ in 0..TXS_COUNT {
         let mut transaction = Vec::new();
         for _ in 0..KEYS_COUNT {
