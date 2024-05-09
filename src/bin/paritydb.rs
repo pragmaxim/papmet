@@ -1,7 +1,7 @@
+use papmet::random::generate_kv;
+use papmet::settings::*;
 use parity_db::{Db, Options};
 use rand::prelude::*;
-use rand::{distributions::Alphanumeric, Rng};
-use std::borrow::BorrowMut as _;
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
@@ -18,32 +18,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let db = Db::open_or_create(&options)?;
 
-    // Prepare to measure insertion time
-
-    let txs = 1000;
-    let keys = 50;
-    let keylen = 32; // Length of each key
-    let valuelen = 256; // Length of each value
-
     let mut all_keys = Vec::new();
     let mut rng = rand::rngs::StdRng::from_entropy();
 
     let start_time = Instant::now();
 
     // Commit 10,000 transactions each with 10 key-value pairs
-    for _ in 0..txs {
+    for _ in 0..TXS_COUNT {
         let mut transaction = Vec::new();
-        for _ in 0..keys {
-            let key = rng
-                .borrow_mut()
-                .sample_iter(&Alphanumeric)
-                .take(keylen)
-                .collect::<Vec<u8>>();
-            let value = rng
-                .borrow_mut()
-                .sample_iter(&Alphanumeric)
-                .take(valuelen)
-                .collect::<Vec<u8>>();
+        for _ in 0..KEYS_COUNT {
+            let (key, value) = generate_kv(&mut rng, KEY_LENGTH, VALUE_LENGTH);
             transaction.push((0, key.clone(), Some(value)));
             all_keys.push(key);
         }
@@ -53,7 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let insertion_duration = start_time.elapsed();
     println!(
         "Completed inserting {:?} key-value pairs. Time taken: {:?}",
-        txs * keys,
+        TXS_COUNT * KEYS_COUNT,
         insertion_duration
     );
 

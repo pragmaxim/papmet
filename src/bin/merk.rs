@@ -1,9 +1,9 @@
 use merk::*;
+use papmet::random::generate_kv;
+use papmet::settings::*;
 use rand::prelude::*;
-use rand::{distributions::Alphanumeric, Rng};
-use std::borrow::BorrowMut as _;
 use std::fs;
-use std::time::Instant;
+use std::time::Instant; // Add missing import // Import the common module
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // delete /tmp/merk.db file if it exists
@@ -11,31 +11,16 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut merk = Merk::open("/tmp/merk.db").unwrap();
 
     // Prepare to measure insertion time
-
-    let txs = 1000;
-    let keys = 50;
-    let keylen = 32; // Length of each key
-    let valuelen = 256; // Length of each value
-
     let mut all_keys = Vec::new();
     let mut rng = rand::rngs::StdRng::from_entropy();
 
     let start_time = Instant::now();
 
     // Commit 10,000 transactions each with 10 key-value pairs
-    for _ in 0..txs {
+    for _ in 0..TXS_COUNT {
         let mut transaction: Vec<(Vec<u8>, Op)> = Vec::new();
-        for _ in 0..keys {
-            let key = rng
-                .borrow_mut()
-                .sample_iter(&Alphanumeric)
-                .take(keylen)
-                .collect::<Vec<u8>>();
-            let value = rng
-                .borrow_mut()
-                .sample_iter(&Alphanumeric)
-                .take(valuelen)
-                .collect::<Vec<u8>>();
+        for _ in 0..KEYS_COUNT {
+            let (key, value) = generate_kv(&mut rng, KEY_LENGTH, VALUE_LENGTH);
             transaction.push((key.clone(), Op::Put(value)));
             all_keys.push(key);
         }
@@ -47,7 +32,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let insertion_duration = start_time.elapsed();
     println!(
         "Completed inserting {:?} key-value pairs. Time taken: {:?}",
-        txs * keys,
+        TXS_COUNT * KEYS_COUNT,
         insertion_duration
     );
 

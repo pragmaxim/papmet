@@ -4,6 +4,32 @@ use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::fmt::Debug;
 
+pub mod settings {
+    pub static TXS_COUNT: usize = 1000;
+    pub static KEYS_COUNT: usize = 50;
+    pub static KEY_LENGTH: usize = 32; // Length of each key
+    pub static VALUE_LENGTH: usize = 256; // Length of each value
+}
+
+// define module utils
+pub mod random {
+    use rand::{distributions::Alphanumeric, Rng};
+    use std::borrow::BorrowMut as _;
+    pub fn generate_kv<R: Rng>(rng: &mut R, keylen: usize, valuelen: usize) -> (Vec<u8>, Vec<u8>) {
+        let key = rng
+            .borrow_mut()
+            .sample_iter(&Alphanumeric)
+            .take(keylen)
+            .collect::<Vec<u8>>();
+        let value = rng
+            .borrow_mut()
+            .sample_iter(&Alphanumeric)
+            .take(valuelen)
+            .collect::<Vec<u8>>();
+        (key, value)
+    }
+}
+
 pub struct TrieNode<T: Debug> {
     children: HashMap<u8, TrieNode<T>>,
     value: Option<T>,

@@ -2,10 +2,11 @@ use firewood::{
     db::{BatchOp, Db, DbConfig},
     v2::api::{Db as _, Proposal},
 };
+use papmet::random::generate_kv;
+use papmet::settings::*;
 use rand::prelude::*;
-use rand::{distributions::Alphanumeric, Rng};
 use std::sync::Arc;
-use std::{borrow::BorrowMut as _, time::Instant};
+use std::time::Instant;
 use tokio;
 
 #[tokio::main]
@@ -17,29 +18,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .expect("db initiation should succeed");
 
-    let txs = 1000;
-    let keys = 50;
-    let keylen = 32; // Length of each key
-    let valuelen = 256; // Length of each value
-
     let mut rng = rand::rngs::StdRng::from_entropy();
     let mut all_keys = Vec::new();
 
     let start_time = Instant::now();
 
-    for _ in 0..txs {
+    for _ in 0..TXS_COUNT {
         let mut transaction = Vec::new();
-        for _ in 0..keys {
-            let key = rng
-                .borrow_mut()
-                .sample_iter(&Alphanumeric)
-                .take(keylen)
-                .collect::<Vec<u8>>();
-            let value = rng
-                .borrow_mut()
-                .sample_iter(&Alphanumeric)
-                .take(valuelen)
-                .collect::<Vec<u8>>();
+        for _ in 0..KEYS_COUNT {
+            let (key, value) = generate_kv(&mut rng, KEY_LENGTH, VALUE_LENGTH);
             transaction.push(BatchOp::Put {
                 key: key.clone(),
                 value,
@@ -54,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let insertion_duration = start_time.elapsed();
     println!(
         "Completed inserting {:?} key-value pairs. Time taken: {:?}",
-        txs * keys,
+        TXS_COUNT * KEYS_COUNT,
         insertion_duration
     );
 
